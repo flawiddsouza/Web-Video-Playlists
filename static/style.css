@@ -1,0 +1,184 @@
+[v-cloak] {
+    display:none;
+}
+
+body {
+    font-family: sans-serif;
+}
+
+main {
+    width: 80em;
+    margin: 0 auto;
+}
+
+.video {
+    display: flex;
+    border: 3px solid #f8f0fc;
+    border-bottom: 0;
+    padding: 1em;
+}
+
+.video:last-child {
+    border-bottom: 3px solid #f8f0fc;
+}
+
+.video-metadata {
+    margin: 2em;
+    color: #2b2b2b;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.video-metadata a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.video-metadata input {
+    font-size: inherit;
+    width: 100%;
+}
+
+.video-metadata a:hover {
+    text-decoration: underline;
+}
+
+.video-metadata-heading {
+    font-size: 1.5em;
+}
+
+.video-metadata-heading a {
+    color: #167ac6;
+}
+
+.video-metadata-subheading {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+}
+
+.video-metadata-subheading a:hover {
+    color: #167ac6;
+}
+
+.video-metadata-date {
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.video-metadata-description {
+    white-space: pre-wrap;
+    margin-top: 2em;
+    margin-bottom: 2em;
+    max-height: 10em;
+    overflow-y: auto;
+}
+
+.video-metadata-description a {
+    word-break: break-all;
+}
+
+.video-metadata-description textarea {
+    display: block;
+    width: 100%;
+    height: 10em;
+    resize: none;
+}
+
+.video:hover .video-metadata-description a {
+    color: #167ac6;
+}
+
+.video-note, .video-tags {
+    margin-bottom: 1em;
+}
+
+.video-note textarea {
+    width: 100%;
+    max-height: 15em;
+    height: 5em;
+    resize: vertical;
+}
+
+.video-actions {
+    margin-top: auto;
+    margin-left: auto;
+}
+
+.video-actions button:not(:last-of-type) {
+    margin-right: 0.5em;
+}
+
+.playlist {
+    display: inline-block;
+    border: 3px solid #f8f0fc;
+    padding: 1em;
+    cursor: pointer;
+}
+
+.playlist-link {
+    color: inherit;
+}
+
+.router-link-exact-active > .playlist {
+    background-color: #f2e0fc;
+    color: purple;
+}
+
+.playlist-link:not(:first-of-type) {
+    margin-left: 1em;
+}
+
+#playlists {
+    margin-bottom: 1em;
+}
+
+.context-menu {
+    display: none;
+    position: absolute;
+    background-color: black;
+    color: white;
+}
+
+.context-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.context-menu ul li {
+    padding: 0.5em 1em;
+}
+
+.context-menu ul li:hover {
+    background-color: teal;
+    cursor: pointer;
+}
+
+.video-action {
+    display: inline-block;
+    border: 3px solid #F2E0FC;
+    padding: 0.3em;
+    margin-right: 0.5em;
+}
+
+.video-action:last-child {
+    margin-left: 0.5em;
+    margin-right: 0;
+}
+
+.video-action select {
+    margin-right: 0.5em;
+}
+
+.video-action span {
+    vertical-align: middle;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+}
+
+#sorter {
+    margin-bottom: 1em;
+    text-align: right;
+}

@@ -1,0 +1,35 @@
+* {
+  box-sizing: border-box;
+}
+
+select, button {
+  cursor: pointer;
+  padding: 0.5em;
+}
+
+button {
+  border: 0;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+  border-radius: 2px;
+  background-color: #f8f8f8;
+  border: solid 1px #d2d2d2;
+}
+
+.button-green, .button-red {
+  color: white;
+}
+
+.button-green {
+  background-color: #12c721;
+  border: solid 1px #0e9819;
+}
+
+.button-red {
+  background-color: #f34545;
+  border: solid 1px #c50d0d;
+}
+
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
