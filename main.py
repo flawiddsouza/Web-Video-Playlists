@@ -49,7 +49,8 @@ def delete_video():
 
 @app.route('/playlists')
 def get_playlists():
-    return get_all('SELECT * FROM playlists')
+    # return get_all('SELECT * FROM playlists')
+    return get_all('SELECT * FROM playlists_ordered_by_latest_video')
 
 @app.route('/playlist/<id>')
 def get_playlist(id):

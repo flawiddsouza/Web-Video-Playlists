@@ -1,3 +1,22 @@
+var store = {
+    debug: false,
+    state: {
+        playlists: []
+    },
+    setPlaylistsAction(newValue) {
+        if (this.debug) console.log('setPlaylistsAction triggered with', newValue)
+        this.state.playlists = newValue
+    },
+    removePlaylistAction(playlist) {
+        if (this.debug) console.log('removePlaylistAction triggered with', playlist)
+        this.state.playlists.splice(this.state.playlists.indexOf(playlist), 1)
+    },
+    clearPlaylistsAction() {
+        if (this.debug) console.log('clearPlaylistsAction triggered')
+        this.state.playlists = []
+    }
+}
+
 Vue.directive('click-outside', {
     bind(el, binding, vnode) {
         el.event = event => {
@@ -19,7 +38,7 @@ Vue.component('video-item', {
     template: `
         <section class="video">
             <div class="video-thumbnail">
-                <a :href="videoObj.source" target="_blank"><img :src="videoObj.thumbnail"></a>
+                <a :href="videoObj.source" target="_blank"><img :src="videoObj.thumbnail_local? '/static/thumbnails/' + videoObj.thumbnail_local : videoObj.thumbnail"></a>
                 <p>{{ videoObj.duration }}</p>
             </div>
             <div class="video-metadata">
@@ -213,11 +232,16 @@ let videos = Vue.component('videos', {
     `,
     data() {
         return {
+            sharedState: store.state,
             loading: true,
             videos: [],
-            playlists: [],
             sorterValue: 'Last Updated Date',
             sorterOrder: 'Descending'
+        }
+    },
+    computed: {
+        playlists() {
+            return this.sharedState.playlists
         }
     },
     created() {
@@ -227,10 +251,10 @@ let videos = Vue.component('videos', {
         if(localStorage.getItem('sorterOrder')) {
             this.sorterOrder = localStorage.getItem('sorterOrder')
         }
-        this.fetchData()
+        this.fetchVideos()
     },
     watch: {
-        '$route': 'fetchData'
+        '$route': 'fetchVideos'
     },
     methods: {
         fetchVideos() {
@@ -262,17 +286,8 @@ let videos = Vue.component('videos', {
                 })
             }
         },
-        fetchPlaylists() {
-            axios.get('/playlists').then(response => {
-                this.playlists = response.data
-            })
-        },
         removeVideoComponent(video) {
             this.videos.splice(this.videos.indexOf(video), 1)
-        },
-        fetchData() {
-            this.fetchVideos()
-            this.fetchPlaylists()
         },
         sortVideos() {
             if(this.sorterValue != 'Last Updated Date') {
@@ -353,9 +368,14 @@ Vue.component('playlists', {
     `,
     data() {
         return {
+            sharedState: store.state,
             loading: true,
-            playlists: [],
             activePlaylist: {}
+        }
+    },
+    computed: {
+        playlists() {
+            return this.sharedState.playlists
         }
     },
     created() {
@@ -367,7 +387,7 @@ Vue.component('playlists', {
     methods: {
         fetchPlaylists() {
             axios.get('/playlists').then(response => {
-                this.playlists = response.data
+                store.setPlaylistsAction(response.data)
                 this.loading = false
             })
         },
@@ -405,7 +425,7 @@ Vue.component('playlists', {
                 axios.post('/delete-playlist', { id: playlist.id }).then(response => {
                     let result = response.data
                     if(result.status == 'success') {
-                        this.playlists.splice(this.playlists.indexOf(playlist), 1)
+                        store.removePlaylistAction(playlist)
                         if(document.location.hash == `#/videos/${playlist.id}/${playlist.name}`) {
                             router.push('/videos')
                         }
