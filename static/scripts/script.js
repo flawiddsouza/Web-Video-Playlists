@@ -1,20 +1,49 @@
 var store = {
     debug: false,
     state: {
-        playlists: []
+        playlists: [],
+        unfilteredPlaylists: [],
+        clickedPlaylistName: ''
     },
     setPlaylistsAction(newValue) {
-        if (this.debug) console.log('setPlaylistsAction triggered with', newValue)
+        if(this.debug) console.log('setPlaylistsAction triggered with', newValue)
         this.state.playlists = newValue
     },
     removePlaylistAction(playlist) {
-        if (this.debug) console.log('removePlaylistAction triggered with', playlist)
+        if(this.debug) console.log('removePlaylistAction triggered with', playlist)
         this.state.playlists.splice(this.state.playlists.indexOf(playlist), 1)
     },
     clearPlaylistsAction() {
-        if (this.debug) console.log('clearPlaylistsAction triggered')
+        if(this.debug) console.log('clearPlaylistsAction triggered')
         this.state.playlists = []
-    }
+    },
+    filterPlaylistsAction(filter) {
+        if(this.debug) console.log('removePlaylistAction triggered with', filter)
+        if(this.state.unfilteredPlaylists.length == 0) {
+            this.state.unfilteredPlaylists = this.state.playlists
+        }
+        if(filter != '') {
+            this.state.playlists = this.state.unfilteredPlaylists.filter(playlist => playlist.name.toLowerCase().includes(filter))
+            if(this.state.playlists.length == 0) {
+                this.state.playlists = [ { name: "No Playlist Found", noContextMenu: true } ]
+            }
+        } else {
+            this.state.playlists = this.state.unfilteredPlaylists
+            this.state.unfilteredPlaylists = []
+        }
+    },
+    sortPlaylistsAction(sortFunction) {
+        if(this.debug) console.log('sortPlaylistsAction triggered with', sortFunction)
+        this.state.playlists.sort(sortFunction)
+    },
+    reversePlaylistsAction() {
+        if(this.debug) console.log('reversePlaylistsAction triggered')
+        this.state.playlists.reverse()
+    },
+    setClickedPlaylistNameAction(newValue) {
+        if(this.debug) console.log('setClickedPlaylistNameAction triggered with', newValue)
+        this.state.clickedPlaylistName = newValue
+    },
 }
 
 Vue.directive('click-outside', {
@@ -33,8 +62,20 @@ Vue.directive('click-outside', {
     },
 })
 
+function dynamicSort(property) { // giving this a -property will sort in descending order | Ex: dynamicSort('-created_at')
+    let sortOrder = 1
+    if(property[0] === "-") {
+        sortOrder = -1
+        property = property.substr(1)
+    }
+    return function(a,b) {
+        var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0
+        return result * sortOrder
+    }
+}
+
 Vue.component('video-item', {
-    props: ['video', 'playlists'],
+    props: ['video', 'index', 'playlists'],
     template: `
         <section class="video">
             <div class="video-thumbnail">
@@ -98,6 +139,7 @@ Vue.component('video-item', {
                     </div>
                 </div>
             </div>
+            <div class="video-index">{{ index + 1 }}</div>
         </section>
     `,
     data() {
@@ -208,25 +250,31 @@ let videos = Vue.component('videos', {
     template: `
         <div id="videos" v-if="loading">Loading videos...</div>
         <div id="videos" v-else-if="videos.length > 0">
-            <div id="sorter">
-                <select v-model="sorterValue" @change="sorterValueChange">
-                    <option disabled>Order by:</option>
-                    <option>Add Date</option>
-                    <option>Last Updated Date</option>
-                    <option>Title</option>
-                    <option>Uploader</option>
-                    <option>Published On</option>
-                </select>
-                <select v-model="sorterOrder" @change="sorterOrderChange">
-                    <option>Ascending</option>
-                    <option>Descending</option>
-                </select>
+            <div class="videos-topbar">
+                <div class="sorter">
+                    <select v-model="sorterValue" @change="sorterValueChange">
+                        <option disabled>Order by:</option>
+                        <option>Add Date</option>
+                        <option>Last Updated Date</option>
+                        <option>Title</option>
+                        <option>Uploader</option>
+                        <option>Published On</option>
+                    </select>
+                    <select v-model="sorterOrder" @change="sorterOrderChange">
+                        <option>Ascending</option>
+                        <option>Descending</option>
+                    </select>
+                </div>
+                <div class="videos-header">{{ videos.length }} {{ videos.length != 1 ? 'videos' : 'video' }}</div>
             </div>
-            <video-item v-for="video in videos"
-                        :key="video.id"
-                        :video="video"
-                        :playlists="playlists"
-                        v-on:remove-video-component="removeVideoComponent(video)"></video-item>
+            <div class="videos-container">
+                <video-item v-for="(video, index) in videos"
+                            :key="video.id"
+                            :video="video"
+                            :index="index"
+                            :playlists="playlists"
+                            v-on:remove-video-component="removeVideoComponent(video)"></video-item>
+            </div>
         </div>
         <div id="videos" v-else>No Videos Found</div>
     `,
@@ -245,11 +293,11 @@ let videos = Vue.component('videos', {
         }
     },
     created() {
-        if(localStorage.getItem('sorterValue')) {
-            this.sorterValue = localStorage.getItem('sorterValue')
+        if(localStorage.getItem('videosSorterValue')) {
+            this.sorterValue = localStorage.getItem('videosSorterValue')
         }
-        if(localStorage.getItem('sorterOrder')) {
-            this.sorterOrder = localStorage.getItem('sorterOrder')
+        if(localStorage.getItem('videosSorterOrder')) {
+            this.sorterOrder = localStorage.getItem('videosSorterOrder')
         }
         this.fetchVideos()
     },
@@ -260,7 +308,7 @@ let videos = Vue.component('videos', {
         fetchVideos() {
             let playlistId = this.$route.params.playlist_id
             axios.get(`/playlist/${playlistId}`).then(response => {
-                playlist = response.data
+                let playlist = response.data
                 if(playlist) {
                     document.title = playlist.name + ' | ' + 'Web Video Playlists'
                 } else {
@@ -285,6 +333,7 @@ let videos = Vue.component('videos', {
                     this.loading = false
                 })
             }
+            scroll(0, 0)
         },
         removeVideoComponent(video) {
             this.videos.splice(this.videos.indexOf(video), 1)
@@ -295,18 +344,7 @@ let videos = Vue.component('videos', {
             }
         },
         sorterValueChange() {
-            localStorage.setItem('sorterValue', this.sorterValue)
-            function dynamicSort(property) { // giving this a -property will sort in descending order | Ex: dynamicSort('-created_at')
-                let sortOrder = 1
-                if(property[0] === "-") {
-                    sortOrder = -1
-                    property = property.substr(1)
-                }
-                return function(a,b) {
-                    var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0
-                    return result * sortOrder
-                }
-            }
+            localStorage.setItem('videosSorterValue', this.sorterValue)
             switch(this.sorterValue) {
                 case 'Add Date':
                     this.videos.sort(dynamicSort('-created_at'))
@@ -329,18 +367,21 @@ let videos = Vue.component('videos', {
             }
         },
         sorterOrderChange() {
-            localStorage.setItem('sorterOrder', this.sorterOrder)
+            localStorage.setItem('videosSorterOrder', this.sorterOrder)
             this.videos.reverse()
         }
     }
 })
 
 Vue.component('playlist-item', {
-    props: ['name', 'description'],
+    props: ['playlist'],
     template: `
-        <section class="playlist" :title="description">
-            {{ name }}
-        </section>
+        <router-link :to="'/videos/' + playlist.id + '/' + playlist.name.replace('?','')" :title="playlist.description" class="playlist" v-if="playlist.id">
+            {{ playlist.name }}
+        </router-link>
+        <div class="playlist" v-else>
+            {{ playlist.name }}
+        </div>
     `
 })
 
@@ -354,15 +395,29 @@ Vue.component('playlists', {
                     <li @click="deletePlaylist(activePlaylist)">Delete</li>
                 </ul>
             </div>
-            <router-link v-for="playlist in playlists" :key="playlist.id" :to="'/videos/' + playlist.id + '/' + playlist.name" class="playlist-link">
-                <playlist-item :name="playlist.name" :description="playlist.description" @contextmenu.prevent.native="showContextMenu($event, playlist)"  v-click-outside="hideContextMenu"></playlist-item>
-            </router-link>
-            <router-link to="/videos" class="playlist-link">
-                <playlist-item name="All Videos"></playlist-item>
-            </router-link>
-            <a @click="createPlaylist()" class="playlist-link">
-                <playlist-item name="+"></playlist-item>
-            </a>
+            <div class="fixed">
+                <div class="block-align-right">
+                    <button @click="createPlaylist()" class="playlist-add">Add Playlist</button>
+                </div>
+                <input type="text" placeholder="Type to filter playlists..." class="playlists-filter" v-on:input="filterPlaylists" v-model="playlistsFilter">
+                <div class="sorter">
+                    <select v-model="sorterValue" @change="sorterValueChange">
+                        <option disabled>Order by:</option>
+                        <option>Add Date</option>
+                        <option>Last Updated Date</option>
+                        <option>Name</option>
+                        <option>Last Added To</option>
+                    </select>
+                    <select v-model="sorterOrder" @change="sorterOrderChange">
+                        <option>Ascending</option>
+                        <option>Descending</option>
+                    </select>
+                </div>
+                <router-link to="/videos" class="playlist">All Videos</router-link>
+                <div class="separator"></div>
+                <playlist-item v-for="playlist in playlists" :key="playlist.id" :playlist="playlist" @contextmenu.prevent.native="showContextMenu($event, playlist)" v-click-outside="hideContextMenu" v-if="!playlist.noContextMenu"></playlist-item>
+                <playlist-item :playlist="playlist" class="cursor-default" v-else></playlist-item>
+            </div>
         </div>
         <div id="playlists" v-else>No Playlists Found</div>
     `,
@@ -370,7 +425,10 @@ Vue.component('playlists', {
         return {
             sharedState: store.state,
             loading: true,
-            activePlaylist: {}
+            activePlaylist: {},
+            playlistsFilter: '',
+            sorterValue: 'Last Added To',
+            sorterOrder: 'Descending'
         }
     },
     computed: {
@@ -379,15 +437,19 @@ Vue.component('playlists', {
         }
     },
     created() {
+        if(localStorage.getItem('playlistsSorterValue')) {
+            this.sorterValue = localStorage.getItem('playlistsSorterValue')
+        }
+        if(localStorage.getItem('playlistsSorterOrder')) {
+            this.sorterOrder = localStorage.getItem('playlistsSorterOrder')
+        }
         this.fetchPlaylists()
-    },
-    watch: {
-        '$route': 'fetchPlaylists'
     },
     methods: {
         fetchPlaylists() {
             axios.get('/playlists').then(response => {
                 store.setPlaylistsAction(response.data)
+                this.sortPlaylists()
                 this.loading = false
             })
         },
@@ -444,6 +506,38 @@ Vue.component('playlists', {
         },
         hideContextMenu() {
             this.$refs.ctx.style.display = 'none'
+        },
+        filterPlaylists() {
+            store.filterPlaylistsAction(this.playlistsFilter)
+        },
+        sortPlaylists() {
+            if(this.sorterValue != 'Last Updated Date') {
+                this.sorterValueChange()
+            }
+        },
+        sorterValueChange() {
+            localStorage.setItem('playlistsSorterValue', this.sorterValue)
+            switch(this.sorterValue) {
+                case 'Add Date':
+                    store.sortPlaylistsAction(dynamicSort('-created_at'))
+                    break
+                case 'Last Updated Date':
+                    store.sortPlaylistsAction(dynamicSort('-updated_at'))
+                    break
+                case 'Name':
+                    store.sortPlaylistsAction(dynamicSort('-name'))
+                    break
+                case 'Last Added To':
+                    store.sortPlaylistsAction(dynamicSort('-updated_at:1'))
+                    break
+            }
+            if(this.sorterOrder == 'Ascending') {
+                store.reversePlaylistsAction()
+            }
+        },
+        sorterOrderChange() {
+            localStorage.setItem('playlistsSorterOrder', this.sorterOrder)
+            store.reversePlaylistsAction()
         }
     }
 })

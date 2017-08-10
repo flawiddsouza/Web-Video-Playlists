@@ -1,7 +1,3 @@
-[v-cloak] {
-    display:none;
-}
-
 body {
     font-family: sans-serif;
 }
@@ -9,6 +5,89 @@ body {
 main {
     width: 80em;
     margin: 0 auto;
+}
+
+#app {
+    display: flex;
+}
+
+#playlists {
+    min-width: 18em;
+    margin-right: 1em;
+}
+
+.fixed {
+    position: fixed;
+    min-width: inherit;
+}
+
+.playlists-filter {
+    display: block;
+    margin-bottom: 1em;
+    width: 100%;
+    padding: 1em 0.5em;
+}
+
+.playlist {
+    display: block;
+    border: 3px solid #f8f0fc;
+    border-bottom: 0;
+    padding: 1em;
+    cursor: pointer;
+    color: inherit;
+    text-decoration: none;
+}
+
+.block-align-right {
+    text-align: right;
+}
+
+.playlist-add {
+    margin-bottom: 1em;
+}
+
+.playlist:first-of-type, .playlist:last-of-type {
+    border-bottom: 3px solid #f8f0fc;
+}
+
+.playlist.router-link-exact-active {
+    background-color: #f2e0fc;
+    color: purple;
+}
+
+.separator {
+    margin-bottom: 1em;
+}
+
+.context-menu {
+    display: none;
+    position: absolute;
+    background-color: black;
+    color: white;
+    z-index: 1;
+}
+
+.context-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.context-menu ul li {
+    padding: 0.5em 1em;
+}
+
+.context-menu ul li:hover {
+    background-color: teal;
+    cursor: pointer;
+}
+
+#videos {
+}
+
+.videos-header {
+    margin-bottom: 0.7em;
+    font-size: 1.5em;
 }
 
 .video {
@@ -23,8 +102,8 @@ main {
 }
 
 .video-thumbnail img {
-    width: 480px;
-    max-height: 360px;
+    width: 360px;
+    max-height: 320px;
 }
 
 .video-metadata {
@@ -115,52 +194,6 @@ main {
     margin-right: 0.5em;
 }
 
-.playlist {
-    display: inline-block;
-    border: 3px solid #f8f0fc;
-    padding: 1em;
-    cursor: pointer;
-}
-
-.playlist-link {
-    color: inherit;
-}
-
-.router-link-exact-active > .playlist {
-    background-color: #f2e0fc;
-    color: purple;
-}
-
-.playlist-link:not(:first-of-type) {
-    margin-left: 1em;
-}
-
-#playlists {
-    margin-bottom: 1em;
-}
-
-.context-menu {
-    display: none;
-    position: absolute;
-    background-color: black;
-    color: white;
-}
-
-.context-menu ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.context-menu ul li {
-    padding: 0.5em 1em;
-}
-
-.context-menu ul li:hover {
-    background-color: teal;
-    cursor: pointer;
-}
-
 .video-action {
     display: inline-block;
     border: 3px solid #F2E0FC;
@@ -183,7 +216,15 @@ main {
     margin-right: 0.5em;
 }
 
-#sorter {
+.sorter {
     margin-bottom: 1em;
     text-align: right;
+}
+
+.cursor-default {
+    cursor: default;
+}
+
+[v-cloak] {
+    display:none;
 }
