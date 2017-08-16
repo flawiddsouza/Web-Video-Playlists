@@ -477,15 +477,11 @@ let videos = Vue.component('videos', {
     methods: {
         fetchVideos() {
             let playlistId = this.$route.params.playlist_id
-            axios.get(`/playlist/${playlistId}`).then(response => {
-                let playlist = response.data
-                if(playlist) {
-                    document.title = playlist.name + ' | ' + 'Web Video Playlists'
-                } else {
-                    document.title = 'All Videos | Web Video Playlists'
-                }
-            })
             if(playlistId) {
+                axios.get(`/playlist/${playlistId}`).then(response => {
+                    let playlist = response.data
+                    document.title = playlist.name + ' | ' + 'Web Video Playlists'
+                })
                 axios.get(`/videos/${playlistId}`).then(response => {
                     this.videos = response.data
                     this.sortVideos()
@@ -498,6 +494,7 @@ let videos = Vue.component('videos', {
             }
             let routePath = this.$route.path
             if(routePath == '/videos') {
+                document.title = 'All Videos | Web Video Playlists'
                 axios.get('/videos').then(response => {
                     this.videos = response.data
                     this.loading = false
