@@ -77,7 +77,7 @@ function dynamicSort(property) { // giving this a -property will sort in descend
 Vue.component('playlist-item', {
     props: ['playlist'],
     template: `
-        <router-link :to="'/videos/' + playlist.id + '/' + playlist.name.replace('?','')" :title="playlist.description" class="playlist" v-if="playlist.id">
+        <router-link :to="'/videos/' + playlist.id + '/' + playlist.name.replace(/[^a-zA-Z0-9-_]/g, '-')" :title="playlist.description" class="playlist" v-if="playlist.id">
             {{ playlist.name }}
         </router-link>
         <div class="playlist" v-else>
@@ -114,10 +114,12 @@ Vue.component('playlists', {
                         <option>Descending</option>
                     </select>
                 </div>
-                <router-link to="/videos" class="playlist">All Videos</router-link>
+                <router-link to="/videos" class="playlist playlist-solo">All Videos</router-link>
                 <div class="separator"></div>
-                <playlist-item v-for="playlist in playlists" :key="playlist.id" :playlist="playlist" @contextmenu.prevent.native="showContextMenu($event, playlist)" v-click-outside="hideContextMenu" v-if="!playlist.noContextMenu"></playlist-item>
-                <playlist-item :playlist="playlist" class="cursor-default" v-else></playlist-item>
+                <div class="make-scrollable">
+                    <playlist-item v-for="playlist in playlists" :key="playlist.id" :playlist="playlist" @contextmenu.prevent.native="showContextMenu($event, playlist)" v-click-outside="hideContextMenu" v-if="!playlist.noContextMenu"></playlist-item>
+                    <playlist-item :playlist="playlist" class="cursor-default" v-else></playlist-item>
+                </div>
             </div>
         </div>
         <div id="playlists" v-else>No Playlists Found</div>
