@@ -29,6 +29,7 @@ main {}
 .make-scrollable {
     height: 100vh;
     overflow-y: auto;
+    padding-bottom: 20em;
 }
 
 .playlist {
