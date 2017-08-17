@@ -553,5 +553,5 @@ new Vue({
 })
 
 if(document.location.hash == '/' || document.location.hash == '#/') {
-    router.push('/videos/1/Watch Later')
+    router.push('/videos/1/Watch-Later')
 }
