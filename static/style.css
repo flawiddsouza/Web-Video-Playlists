@@ -136,6 +136,7 @@ main {}
 
 .video-metadata-heading {
     font-size: 1.5em;
+    word-break: break-all;
 }
 
 .video-metadata-heading a {
@@ -163,6 +164,7 @@ main {}
     margin-bottom: 2em;
     max-height: 10em;
     overflow-y: auto;
+    word-break: break-all;
 }
 
 .video-metadata-description a {
