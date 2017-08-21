@@ -247,7 +247,7 @@ Vue.component('video-item', {
             </div>
             <div class="video-metadata">
                 <div class="video-metadata-heading">
-                    <a :href="videoObj.source" target="_blank" v-if="!editVideoBool">{{ videoObj.title }}</a>
+                    <a :href="videoObj.source" target="_blank" v-if="!editVideoBool">{{ videoObj.title ? videoObj.title : videoObj.source }}</a>
                     <span v-else>
                         <input type="text" v-model="editVideoObj.title">
                         <input type="text" v-model="editVideoObj.source">
@@ -264,7 +264,7 @@ Vue.component('video-item', {
                     <span v-if="!editVideoBool">{{ momentDateTime(videoObj.published_at) }}</span>
                     <input type="text" v-model="editVideoObj.published_at" v-else>
                 </div>
-                <div class="video-metadata-description" v-html="videoObj.description.replace(/(https?:.*)/g, '<a href=$1>$1</a>')" v-if="!editVideoBool"></div>
+                <div class="video-metadata-description" v-html="videoObj.description? videoObj.description.replace(/(https?:.*)/g, '<a href=$1>$1</a>') : videoObj.description" v-if="!editVideoBool"></div>
                 <div class="video-metadata-description" v-else>
                     <textarea v-model="editVideoObj.description"></textarea>
                 </div>
