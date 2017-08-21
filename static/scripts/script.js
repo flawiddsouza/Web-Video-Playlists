@@ -431,12 +431,15 @@ let videos = Vue.component('videos', {
                 <div class="videos-header">{{ videos.length }} {{ videos.length != 1 ? 'videos' : 'video' }}</div>
             </div>
             <div class="videos-container">
-                <video-item v-for="(video, index) in videos"
+                <video-item v-for="(video, index) in videosLimited"
                             :key="video.id"
                             :video="video"
                             :index="index"
                             :playlists="playlists"
                             v-on:remove-video-component="removeVideoComponent(video)"></video-item>
+                <infinite-loading :on-infinite="limitVideos" ref="infiniteLoading">
+                    <span slot="no-more"></span>
+                </infinite-loading>
             </div>
         </div>
         <div id="videos" v-else>No Videos Found</div>
@@ -446,6 +449,8 @@ let videos = Vue.component('videos', {
             sharedState: store.state,
             loading: true,
             videos: [],
+            videosLimited: [],
+            limitRendered: 0,
             sorterValue: 'Last Updated Date',
             sorterOrder: 'Descending'
         }
@@ -465,7 +470,8 @@ let videos = Vue.component('videos', {
         this.fetchVideos()
     },
     watch: {
-        '$route': 'fetchVideos'
+        '$route': 'fetchVideos',
+        'videos': 'resetRefreshLimitVideos'
     },
     methods: {
         fetchVideos() {
@@ -529,6 +535,35 @@ let videos = Vue.component('videos', {
         sorterOrderChange() {
             localStorage.setItem('videosSorterOrder', this.sorterOrder)
             this.videos.reverse()
+        },
+        limitVideos() {
+            let limit = 50
+            if(this.limitRendered == 0) {
+                this.videosLimited = this.videos.slice(this.limitRendered, limit)
+                this.limitRendered += limit
+                // console.log('limitVideos', 'HIT:INIT')
+            } else {
+                this.videosLimited = this.videosLimited.concat(this.videos.slice(this.limitRendered, this.limitRendered+limit))
+                this.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded')
+                if(this.limitRendered+limit <= this.videos.length) {
+                    this.limitRendered += limit
+                    // console.log('limitVideos', 'HIT:INCREMENT')
+                } else {
+                    this.$refs.infiniteLoading.$emit('$InfiniteLoading:complete')
+                    // console.log('limitVideos', 'HIT:END')
+                }
+            }
+        },
+        resetRefreshLimitVideos() {
+            this.videosLimited = []
+            this.limitRendered = 0
+            this.limitVideos()
+            this.$nextTick(() => {
+                if(this.$refs.infiniteLoading) {
+                    this.$refs.infiniteLoading.$emit('$InfiniteLoading:reset')
+                    // console.log('limitVideos', 'HIT:RESET')
+                }
+            })
         }
     }
 })
