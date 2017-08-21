@@ -2,7 +2,6 @@ var store = {
     debug: false,
     state: {
         playlists: [],
-        unfilteredPlaylists: [],
         clickedPlaylistName: ''
     },
     setPlaylistsAction(newValue) {
@@ -16,21 +15,6 @@ var store = {
     clearPlaylistsAction() {
         if(this.debug) console.log('clearPlaylistsAction triggered')
         this.state.playlists = []
-    },
-    filterPlaylistsAction(filter) {
-        if(this.debug) console.log('removePlaylistAction triggered with', filter)
-        if(this.state.unfilteredPlaylists.length == 0) {
-            this.state.unfilteredPlaylists = this.state.playlists
-        }
-        if(filter != '') {
-            this.state.playlists = this.state.unfilteredPlaylists.filter(playlist => playlist.name.toLowerCase().includes(filter))
-            if(this.state.playlists.length == 0) {
-                this.state.playlists = [ { name: "No Playlist Found", noContextMenu: true } ]
-            }
-        } else {
-            this.state.playlists = this.state.unfilteredPlaylists
-            this.state.unfilteredPlaylists = []
-        }
     },
     sortPlaylistsAction(sortFunction) {
         if(this.debug) console.log('sortPlaylistsAction triggered with', sortFunction)
@@ -136,7 +120,7 @@ Vue.component('playlists', {
     },
     computed: {
         playlists() {
-            return this.sharedState.playlists
+            return this.filterPlaylists()
         }
     },
     created() {
@@ -210,7 +194,16 @@ Vue.component('playlists', {
             this.$refs.ctx.style.display = 'none'
         },
         filterPlaylists() {
-            store.filterPlaylistsAction(this.playlistsFilter)
+            if(this.playlistsFilter != '') {
+                let filteredPlaylists = this.sharedState.playlists.filter(playlist => playlist.name.toLowerCase().includes(this.playlistsFilter))
+                if(filteredPlaylists.length != 0) {
+                    return filteredPlaylists
+                } else {
+                    return [ { name: "No Playlist Found", noContextMenu: true } ]
+                }
+            } else {
+                return this.sharedState.playlists
+            }
         },
         sortPlaylists() {
             if(this.sorterValue != 'Last Updated Date') {
