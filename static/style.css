@@ -91,6 +91,22 @@ main {}
     width: 70em;
 }
 
+.videos-filter {
+    display: flex;
+    margin-bottom: 1em;
+    justify-content: center;
+}
+
+.videos-filter input {
+    flex: 2;
+    padding: 0.5em;
+}
+
+.videos-filter select {
+    flex: 1;
+    margin-left: 0.5em;
+}
+
 .videos-header {
     margin-bottom: 0.7em;
     font-size: 1.5em;

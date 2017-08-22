@@ -412,8 +412,18 @@ Vue.component('video-item', {
 let videos = Vue.component('videos', {
     template: `
         <div id="videos" v-if="loading">Loading videos...</div>
-        <div id="videos" v-else-if="videos.length > 0">
+        <div id="videos" v-else>
             <div class="videos-topbar">
+                <div class="videos-filter">
+                    <input type="text" placeholder="Type to filter videos..." v-on:input="filterVideos" v-model="videosFilter">
+                    <select v-model="filterVideosBy" @change="filterVideos">
+                        <option>By Title</option>
+                        <option>By Uploader</option>
+                        <option>By Description</option>
+                        <option>By Note</option>
+                        <option>By Tags</option>
+                    </select>
+                </div>
                 <div class="sorter">
                     <select v-model="sorterValue" @change="sorterValueChange">
                         <option disabled>Order by:</option>
@@ -430,7 +440,7 @@ let videos = Vue.component('videos', {
                 </div>
                 <div class="videos-header">{{ videos.length }} {{ videos.length != 1 ? 'videos' : 'video' }}</div>
             </div>
-            <div class="videos-container">
+            <div class="videos-container" v-if="videos.length > 0">
                 <video-item v-for="(video, index) in videosLimited"
                             :key="video.id"
                             :video="video"
@@ -441,16 +451,19 @@ let videos = Vue.component('videos', {
                     <span slot="no-more"></span>
                 </infinite-loading>
             </div>
+            <div id="videos-container" v-else>No Videos Found</div>
         </div>
-        <div id="videos" v-else>No Videos Found</div>
     `,
     data() {
         return {
             sharedState: store.state,
             loading: true,
             videos: [],
+            unfilteredVideos: [],
             videosLimited: [],
             limitRendered: 0,
+            videosFilter: '',
+            filterVideosBy: 'By Title',
             sorterValue: 'Last Updated Date',
             sorterOrder: 'Descending'
         }
@@ -466,6 +479,9 @@ let videos = Vue.component('videos', {
         }
         if(localStorage.getItem('videosSorterOrder')) {
             this.sorterOrder = localStorage.getItem('videosSorterOrder')
+        }
+        if(localStorage.getItem('filterVideosBy')) {
+            this.filterVideosBy = localStorage.getItem('filterVideosBy')
         }
         this.fetchVideos()
     },
@@ -503,6 +519,56 @@ let videos = Vue.component('videos', {
         },
         removeVideoComponent(video) {
             this.videos.splice(this.videos.indexOf(video), 1)
+        },
+        filterVideos() {
+            localStorage.setItem('filterVideosBy', this.filterVideosBy)
+            if(this.videosFilter != '') {
+                if(this.unfilteredVideos.length == 0) {
+                    this.unfilteredVideos = this.videos
+                }
+                switch(this.filterVideosBy) {
+                    case 'By Title':
+                        this.videos = this.unfilteredVideos.filter(video => {
+                            if(video.title) {
+                                return  video.title.toLowerCase().includes(this.videosFilter.toLowerCase())
+                            }
+                        })
+                        break
+                    case 'By Uploader':
+                        this.videos = this.unfilteredVideos.filter(video => {
+                            if(video.uploader) {
+                                return  video.uploader.toLowerCase().includes(this.videosFilter.toLowerCase())
+                            }
+                        })
+                        break
+                    case 'By Description':
+                        this.videos = this.unfilteredVideos.filter(video => {
+                            if(video.description) {
+                                return  video.description.toLowerCase().includes(this.videosFilter.toLowerCase())
+                            }
+                        })
+                        break
+                    case 'By Note':
+                        this.videos = this.unfilteredVideos.filter(video => {
+                            if(video.note) {
+                                return  video.note.toLowerCase().includes(this.videosFilter.toLowerCase())
+                            }
+                        })
+                        break
+                    case 'By Tags':
+                        this.videos = this.unfilteredVideos.filter(video => {
+                            if(video.tags) {
+                                return  video.tags.toLowerCase().includes(this.videosFilter.toLowerCase())
+                            }
+                        })
+                        break
+                }
+            } else {
+                if(this.unfilteredVideos.length > 0) {
+                    this.videos = this.unfilteredVideos
+                    this.unfilteredVideos = []
+                }
+            }
         },
         sortVideos() {
             if(this.sorterValue != 'Last Updated Date') {
