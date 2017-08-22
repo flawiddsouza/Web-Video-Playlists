@@ -25,8 +25,9 @@ for (dirpath, dirnames, filenames) in os.walk(thumbnails_dir):
 local_thumbnails_not_in_use = local_thumbnails_in_folder.symmetric_difference(local_thumbnails_in_use)
 
 for local_thumbnail_not_in_use in local_thumbnails_not_in_use:
-    filepath = os.path.join(thumbnails_dir, local_thumbnail_not_in_use)
-    if os.path.isfile(filepath):
-        os.remove(filepath)
+    if local_thumbnail_not_in_use != '.gitignore':
+        filepath = os.path.join(thumbnails_dir, local_thumbnail_not_in_use)
+        if os.path.isfile(filepath):
+            os.remove(filepath)
 
-print(str(len(local_thumbnails_not_in_use)) + ' unused items have been removed from the thumbnails directory')
+print(str(len(local_thumbnails_not_in_use)-1) + ' unused items have been removed from the thumbnails directory')
