@@ -195,7 +195,7 @@ Vue.component('playlists', {
         },
         filterPlaylists() {
             if(this.playlistsFilter != '') {
-                let filteredPlaylists = this.sharedState.playlists.filter(playlist => playlist.name.toLowerCase().includes(this.playlistsFilter))
+                let filteredPlaylists = this.sharedState.playlists.filter(playlist => playlist.name.toLowerCase().includes(this.playlistsFilter.toLowerCase()))
                 if(filteredPlaylists.length != 0) {
                     return filteredPlaylists
                 } else {
