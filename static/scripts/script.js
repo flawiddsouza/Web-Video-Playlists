@@ -462,7 +462,7 @@ let videos = Vue.component('videos', {
             unfilteredVideos: [],
             videosLimited: [],
             limitRendered: 0,
-            videosFilter: '',
+            videosFilter: null,
             filterVideosBy: 'By Title',
             sorterValue: 'Last Updated Date',
             sorterOrder: 'Descending'
@@ -516,6 +516,7 @@ let videos = Vue.component('videos', {
                 })
             }
             scroll(0, 0)
+            this.videosFilter = null // clear videos search filter
         },
         removeVideoComponent(video) {
             this.videos.splice(this.videos.indexOf(video), 1)
