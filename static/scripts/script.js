@@ -520,6 +520,9 @@ let videos = Vue.component('videos', {
         },
         removeVideoComponent(video) {
             this.videos.splice(this.videos.indexOf(video), 1)
+            if(this.unfilteredVideos.length > 0) { // when videos are filtered, we also need to clear the item from this array
+                this.unfilteredVideos.splice(this.unfilteredVideos.indexOf(video), 1)
+            }
         },
         filterVideos() {
             localStorage.setItem('filterVideosBy', this.filterVideosBy)
