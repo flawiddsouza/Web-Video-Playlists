@@ -13,13 +13,17 @@ with sqlite3.connect('store.db') as connection:
     videos = c.execute('SELECT * FROM videos')
     videos = videos.fetchall()
     for video in videos:
+        count = 0
         if not video['thumbnail_local']:
             print(video['title'])
             response = requests.get(video['thumbnail'], stream=True)
             total_size = int(response.headers.get('content-length', 0)) 
             filename = str(uuid.uuid4()) + '_' + video['thumbnail'].rsplit('/', 1)[-1]
+            filename = re.sub(r"\?.*", '', filename)
             with open('static/thumbnails/' + filename, 'wb') as handle:
                 for data in tqdm(response.iter_content(), total=total_size):
                     handle.write(data)
             c.execute(f'UPDATE videos SET thumbnail_local=? WHERE id=?', [filename, video['id']])
+            count = count + 1
+            print(count + ' thumbnails have been localized')
     connection.commit()
