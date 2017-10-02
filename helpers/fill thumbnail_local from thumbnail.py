@@ -12,8 +12,8 @@ with sqlite3.connect('store.db') as connection:
     c.row_factory = sqlite3.Row
     videos = c.execute('SELECT * FROM videos')
     videos = videos.fetchall()
+    count = 0
     for video in videos:
-        count = 0
         if not video['thumbnail_local']:
             print(video['title'])
             response = requests.get(video['thumbnail'], stream=True)
@@ -25,5 +25,5 @@ with sqlite3.connect('store.db') as connection:
                     handle.write(data)
             c.execute(f'UPDATE videos SET thumbnail_local=? WHERE id=?', [filename, video['id']])
             count = count + 1
-            print(count + ' thumbnails have been localized')
+    print(str(count) + ' thumbnails have been localized')
     connection.commit()
