@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 app.database = 'store.db'
 app.database = os.path.join(os.path.dirname(__file__), app.database)
-app.debug = True
+app.debug = False
 
 videos_table_columns = ['title', 'description', 'thumbnail', 'duration', 'uploader', 'uploader_url', 'published_at', 'source', 'note', 'tags', 'playlist_id']
 playlists_table_columns = ['name', 'description']
@@ -81,7 +81,7 @@ def delete_playlist():
         return jsonify(status='error', message="Playlist Couldn't be Deleted")
 
 def connect_db():
-    return sqlite3.connect(app.database)
+    return sqlite3.connect(app.database, timeout=10)
 
 def insert(request, table_name, table_columns):
     table_columns_dict = {}
