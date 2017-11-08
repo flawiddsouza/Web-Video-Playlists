@@ -134,7 +134,13 @@ Vue.component('playlists', {
     },
     methods: {
         fetchPlaylists() {
+            if(localStorage.getItem('playlistsCache')) {
+                store.setPlaylistsAction(JSON.parse(localStorage.getItem('playlistsCache')))
+                this.sortPlaylists()
+                this.loading = false
+            }
             axios.get('/playlists').then(response => {
+                localStorage.setItem('playlistsCache', JSON.stringify(response.data))
                 store.setPlaylistsAction(response.data)
                 this.sortPlaylists()
                 this.loading = false
