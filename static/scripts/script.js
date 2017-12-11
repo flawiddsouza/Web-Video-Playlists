@@ -274,7 +274,7 @@ Vue.component('video-item', {
                 <div class="video-metadata-description" v-else>
                     <textarea v-model="editVideoObj.description"></textarea>
                 </div>
-                <div class="video-note" v-if="videoObj.note && !editVideoBool">Note: {{ videoObj.note }}</div>
+                <div class="video-note" v-if="videoObj.note && !editVideoBool">Note: <span class="video-note-text">{{ videoObj.note }}</span></div>
                 <div class="video-note" v-if="editVideoBool">
                     Note<br>
                     <textarea v-model="editVideoObj.note"></textarea>
