@@ -96,10 +96,14 @@ def insert(request, table_name, table_columns):
     fields = ",".join(table_columns_dict.keys())
     question_marks = ','.join(list('?'*len(table_columns_dict)))
     values = list(table_columns_dict.values())
-    g.db = connect_db()
-    g.db.execute(f'INSERT into {table_name}({fields}) VALUES({question_marks})', values)
-    g.db.commit()
-    g.db.close()
+    try:
+        g.db = connect_db()
+        g.db.execute(f'INSERT into {table_name}({fields}) VALUES({question_marks})', values)
+        g.db.commit()
+        g.db.close()
+    except Exception as e:
+        print(e)
+        return False
     return True
 
 def update(request, table_name, table_columns):
@@ -123,10 +127,14 @@ def update(request, table_name, table_columns):
     fields = "=?,".join(table_columns_dict.keys()) + "=?"
     values = list(table_columns_dict.values())
     values.append(id)
-    g.db = connect_db()
-    g.db.execute(f'UPDATE {table_name} SET {fields}, updated_at=CURRENT_TIMESTAMP WHERE id=?', values)
-    g.db.commit()
-    g.db.close()
+    try:
+        g.db = connect_db()
+        g.db.execute(f'UPDATE {table_name} SET {fields}, updated_at=CURRENT_TIMESTAMP WHERE id=?', values)
+        g.db.commit()
+        g.db.close()
+    except Exception as e:
+        print(e)
+        return False
     return True
 
 def delete(request, table_name):
@@ -140,10 +148,14 @@ def delete(request, table_name):
             id = request.get_json()['id']
         else:
             return False
-    g.db = connect_db()
-    g.db.execute(f'DELETE FROM {table_name} WHERE id=?', [id])
-    g.db.commit()
-    g.db.close()
+    try:
+        g.db = connect_db()
+        g.db.execute(f'DELETE FROM {table_name} WHERE id=?', [id])
+        g.db.commit()
+        g.db.close()
+    except Exception as e:
+        print(e)
+        return False
     return True
 
 def get_one(query, query_params):
