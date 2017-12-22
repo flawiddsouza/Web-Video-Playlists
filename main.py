@@ -163,6 +163,7 @@ def get_one(query, query_params):
     g.db.row_factory = make_dicts
     row = g.db.execute(query, query_params)
     row = row.fetchone()
+    g.db.close()
     return jsonify(row)
 
 def get_all(query, query_params=None):
@@ -173,6 +174,7 @@ def get_all(query, query_params=None):
     else:
         rows = g.db.execute(query)
     rows = rows.fetchall()
+    g.db.close()
     return jsonify(rows)
 
 def make_dicts(cursor, row):
