@@ -1,6 +1,7 @@
 from flask import Flask, render_template, jsonify, g, request
 import os
 import sqlite3
+from operator import itemgetter
 
 app = Flask(__name__)
 
@@ -49,8 +50,58 @@ def delete_video():
 
 @app.route('/playlists')
 def get_playlists():
-    # return get_all('SELECT * FROM playlists')
-    return get_all('SELECT * FROM playlists_ordered_by_latest_video')
+    g.db = connect_db()
+    g.db.row_factory = make_dicts
+    videos = g.db.execute('SELECT * FROM videos')
+    videos = videos.fetchall()
+    playlists = g.db.execute('SELECT * FROM playlists')
+    playlists = playlists.fetchall()
+    g.db.close()
+
+    videos_playlists = dict()
+    for video in videos:
+        if video['playlist_id'] in videos_playlists:
+            videos_playlists[video['playlist_id']].append(video)
+        else:
+            videos_playlists[video['playlist_id']] = list()
+            videos_playlists[video['playlist_id']].append(video)
+
+    playlist_ids_by_latest_video = list()
+
+    for videos_playlist in videos_playlists:
+        max_dict_in_list = max(videos_playlists[videos_playlist], key=itemgetter('updated_at'))
+        custom_dict = dict()
+        custom_dict['id'] = max_dict_in_list['playlist_id']
+        custom_dict['updated_at:1'] = max_dict_in_list['updated_at']
+        playlist_ids_by_latest_video.append(custom_dict)
+
+    playlists_by_latest_video = list()
+    for playlist_id_by_latest_video in playlist_ids_by_latest_video:
+        for playlist in playlists:
+            if playlist['id'] == playlist_id_by_latest_video['id']:
+                playlists_by_latest_video.append({**playlist_id_by_latest_video, **playlist})
+
+    playlists_by_latest_video_sorted_desc = sorted(playlists_by_latest_video, key=itemgetter('updated_at:1'), reverse=True)
+
+    # missing_playlists aka playlists with no videos added to them yet, so there's no latest video, hence the missing tag
+    missing_playlists = list()
+    for playlist in playlists:
+        this_playlist_found = False
+        for playlist_by_latest_video_sorted_desc in playlists_by_latest_video_sorted_desc:
+            if playlist['id'] == playlist_by_latest_video_sorted_desc['id']:
+                this_playlist_found = True
+                break
+        if this_playlist_found is False:
+            missing_playlists.append(playlist)
+
+    final_playlists = playlists_by_latest_video_sorted_desc + missing_playlists
+
+    # if len(playlists) == len(final_playlists):
+    #     print("total playlists are equal - yay! :)")
+    # else:
+    #     print("total playlists are unequal - nay :(")
+
+    return jsonify(final_playlists)
 
 @app.route('/playlist/<id>')
 def get_playlist(id):
