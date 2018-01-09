@@ -385,7 +385,7 @@ Vue.component('video-item', {
                 axios.post('/edit-video', dataToSend).then(response => {
                     let result = response.data
                     if(result.status == 'success') {
-                        this.videoObj = this.editVideoObj
+                        this.videoObj = JSON.parse(JSON.stringify(this.editVideoObj))
                         this.videoObj['updated_at'] = moment.utc()
                     } else {
                         alert(result.message)
