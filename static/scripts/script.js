@@ -212,7 +212,7 @@ Vue.component('playlists', {
             }
         },
         sortPlaylists() {
-            if(this.sorterValue != 'Last Updated Date') {
+            if(this.sorterValue != 'Last Added To') {
                 this.sorterValueChange()
             }
         },
