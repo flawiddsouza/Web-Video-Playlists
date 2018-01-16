@@ -523,6 +523,7 @@ let videos = Vue.component('videos', {
             }
             scroll(0, 0)
             this.videosFilter = null // clear videos search filter
+            this.unfilteredVideos = [] // clear unfilteredVideos
         },
         removeVideoComponent(video) {
             this.videos.splice(this.videos.indexOf(video), 1)
