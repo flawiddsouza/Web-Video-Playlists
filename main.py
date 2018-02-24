@@ -131,6 +131,17 @@ def delete_playlist():
     else:
         return jsonify(status='error', message="Playlist Couldn't be Deleted")
 
+@app.route('/url-exists-in-playlist')
+def url_exists_in_playlist():
+    g.db = connect_db()
+    g.db.row_factory = make_dicts
+    videos = g.db.execute('SELECT playlist_id FROM videos WHERE source LIKE ?', [request.args.get('url') + '%']).fetchall()
+    found_in_playlists = []
+    for video in videos:
+        found_in_playlists.append(g.db.execute('SELECT name FROM playlists WHERE id = ?', [video['playlist_id']]).fetchone()['name'])
+    g.db.close()
+    return jsonify(found_in_playlists)
+
 def connect_db():
     return sqlite3.connect(app.database, timeout=10)
 
