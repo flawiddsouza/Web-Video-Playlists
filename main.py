@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, g, request
+from flask import Flask, jsonify, g, request
 import os
 import sqlite3
 from operator import itemgetter

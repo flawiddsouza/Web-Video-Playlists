@@ -1,3 +1,2 @@
-Flask==0.12.2
-requests==2.18.3
--e git+https://github.com/dpallot/simple-websocket-server.git#egg=simple-websocket-server
+Flask==3.0.0
+requests==2.31.0
