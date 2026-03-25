@@ -256,3 +256,22 @@ main {}
 [v-cloak] {
     display:none;
 }
+
+.video-dt-backup {
+    font-size: 0.8em;
+    margin-bottom: 1em;
+}
+
+.video-dt-status {
+    font-weight: bold;
+    margin-right: 0.5em;
+}
+
+.video-dt-open {
+    color: #167ac6;
+    text-decoration: none;
+}
+
+.video-dt-open:hover {
+    text-decoration: underline;
+}

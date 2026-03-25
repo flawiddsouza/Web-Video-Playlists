@@ -1,13 +1,21 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask, jsonify, g, request
 import os
 import sqlite3
 from operator import itemgetter
+import threading
+import backup_worker
+import db_setup
 
 app = Flask(__name__)
 
 app.database = 'store.db'
 app.database = os.path.join(os.path.dirname(__file__), app.database)
 app.debug = False
+
+db_setup.setup(app.database)
 
 videos_table_columns = ['title', 'description', 'thumbnail', 'duration', 'uploader', 'uploader_url', 'published_at', 'source', 'note', 'tags', 'playlist_id']
 playlists_table_columns = ['name', 'description']
@@ -142,6 +150,17 @@ def url_exists_in_playlist():
     g.db.close()
     return jsonify(found_in_playlists)
 
+@app.route('/dt-config')
+def dt_config():
+    dt_url = os.environ.get('DT_URL')
+    if not dt_url:
+        return jsonify(enabled=False)
+    return jsonify(
+        enabled=True,
+        url=dt_url,
+        libraryId=os.environ.get('DT_LIBRARY_ID', 'main')
+    )
+
 def connect_db():
     return sqlite3.connect(app.database, timeout=10)
 
@@ -242,6 +261,14 @@ def get_all(query, query_params=None):
 def make_dicts(cursor, row):
     return dict((cursor.description[idx][0], value)
                 for idx, value in enumerate(row))
+
+if os.environ.get('DT_URL'):
+    _worker_thread = threading.Thread(
+        target=backup_worker.run,
+        args=(app.database,),
+        daemon=True,
+    )
+    _worker_thread.start()
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=9881, threaded=True)

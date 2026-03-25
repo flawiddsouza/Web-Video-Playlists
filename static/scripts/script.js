@@ -244,7 +244,7 @@ Vue.component('playlists', {
 })
 
 Vue.component('video-item', {
-    props: ['video', 'index', 'playlists'],
+    props: ['video', 'index', 'playlists', 'dtConfig'],
     template: `
         <section class="video">
             <div class="video-thumbnail">
@@ -286,6 +286,10 @@ Vue.component('video-item', {
                 </div>
                 <div class="video-metadata-date">Added on {{ momentDateTime(videoObj.created_at) }}</div>
                 <div class="video-metadata-date">Last Updated on {{ momentDateTime(videoObj.updated_at) }}</div>
+                <div class="video-dt-backup" v-if="dtConfig && dtConfig.enabled && videoObj.dt_timeline_id">
+                    <span class="video-dt-status">{{ dtStatusLabel }}</span>
+                    <a :href="dtLink" target="_blank" class="video-dt-open">Open in DT</a>
+                </div>
                 <div class="video-actions">
                     <button @click="enableChangePlaylist" v-if="!changePlaylistBool">Change Playlist</button>
                     <div class="video-action" v-else>
@@ -319,6 +323,21 @@ Vue.component('video-item', {
             videoObj: JSON.parse(JSON.stringify(this.video)),
             editVideoObj: JSON.parse(JSON.stringify(this.video))
         }
+    },
+    computed: {
+        dtStatusLabel() {
+            const labels = {
+                queued: 'Backup queued',
+                downloaded: 'Backed up',
+                failed: 'Backup failed',
+            }
+            return labels[this.videoObj.dt_status] || 'Backup submitted'
+        },
+        dtLink() {
+            const search = `id:${this.videoObj.dt_timeline_id}`
+            const filters = btoa(JSON.stringify({ search }))
+            return `${this.dtConfig.url}/?library=${this.dtConfig.libraryId}&filters=${filters}`
+        },
     },
     methods: {
         momentDateTime(dateTime) {
@@ -452,6 +471,7 @@ let videos = Vue.component('videos', {
                             :video="video"
                             :index="index"
                             :playlists="playlists"
+                            :dt-config="dtConfig"
                             v-on:remove-video-component="removeVideoComponent(video)"></video-item>
                 <infinite-loading :on-infinite="limitVideos" ref="infiniteLoading">
                     <span slot="no-more"></span>
@@ -471,7 +491,8 @@ let videos = Vue.component('videos', {
             videosFilter: null,
             filterVideosBy: 'By Title',
             sorterValue: 'Last Updated Date',
-            sorterOrder: 'Descending'
+            sorterOrder: 'Descending',
+            dtConfig: { enabled: false },
         }
     },
     computed: {
@@ -490,6 +511,9 @@ let videos = Vue.component('videos', {
             this.filterVideosBy = localStorage.getItem('filterVideosBy')
         }
         this.fetchVideos()
+        axios.get('/dt-config').then(response => {
+            this.dtConfig = response.data
+        })
     },
     watch: {
         '$route': 'fetchVideos',
