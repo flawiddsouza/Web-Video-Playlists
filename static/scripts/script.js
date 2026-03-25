@@ -447,6 +447,7 @@ let videos = Vue.component('videos', {
                         <option>By Description</option>
                         <option>By Note</option>
                         <option>By Tags</option>
+                        <option>By URL</option>
                     </select>
                 </div>
                 <div class="sorter">
@@ -594,6 +595,13 @@ let videos = Vue.component('videos', {
                         this.videos = this.unfilteredVideos.filter(video => {
                             if(video.tags) {
                                 return  video.tags.toLowerCase().includes(this.videosFilter.toLowerCase())
+                            }
+                        })
+                        break
+                    case 'By URL':
+                        this.videos = this.unfilteredVideos.filter(video => {
+                            if(video.source) {
+                                return  video.source.toLowerCase().includes(this.videosFilter.toLowerCase())
                             }
                         })
                         break
